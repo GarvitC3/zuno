@@ -1091,14 +1091,14 @@
 .fc-pick {
   min-width: 220px;
 }
-.forecast-lower {
+.forecast-grid {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  grid-template-columns: minmax(0, 8fr) minmax(320px, 4fr);
   gap: var(--s-6);
   align-items: start;
 }
 @media (max-width: 1100px) {
-  .forecast-lower {
+  .forecast-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -1109,14 +1109,13 @@
 }
 .wi-add {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.9fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--s-2);
   align-items: start;
 }
-@media (max-width: 520px) {
-  .wi-add {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
+.wi-add > :first-child,
+.wi-add > :last-child {
+  grid-column: 1 / -1;
 }
 .stats {
   display: grid;

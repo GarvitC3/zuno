@@ -75,6 +75,7 @@ export function Forecast() {
 
       <ChangeBanner />
 
+      <div className="forecast-grid">
       <section className="panel stack stack--lg" aria-labelledby="fc-h">
         <div className="fc-head">
           <div className="stack stack--sm">
@@ -108,7 +109,7 @@ export function Forecast() {
               examLabel={`Exam ${formatDateShort(fromAbs(f.examAbs).date)}`}
               dots={f.observed.map((o) => ({ atAbs: o.atAbs, value: o.value, label: `Recall check: ${o.correct}/${o.total}` }))}
               marks={f.reviews.map((r) => ({ atAbs: r.atAbs, label: `Planned review, ${r.durationMin} min` }))}
-              height={360}
+              height={340}
               endLabels={fs ? ['scenario', 'plan', 'baseline'] : ['plan', 'baseline']}
               ariaLabel={`Forecast for ${f.topic.name}: on exam day, ${pct(f.examPlan)} with planned reviews and ${pct(f.examBaseline)} with no further review${fs ? `; the What-If preview gives ${pct(fs.examPlan)}` : ''}.`}
             />
@@ -143,7 +144,7 @@ export function Forecast() {
         ) : null}
       </section>
 
-      <div className="forecast-lower">
+      <aside className="stack">
         <section className="panel" aria-labelledby="rev-h">
           <h2 id="rev-h" className="panel__title" style={{ marginBottom: 'var(--s-3)' }}>Planned reviews</h2>
           {reviews.length > 0 && f ? (
@@ -171,6 +172,7 @@ export function Forecast() {
         </section>
 
         <WhatIf data={data} now={now} ops={ops} setOps={setOps} baseStats={base} scenarioStats={scenario?.stats ?? null} pinned={scenario?.pinnedOnBlockedDays ?? 0} onApply={() => { store.applyWhatIf(ops); setOps([]); navigate('/') }} />
+      </aside>
       </div>
     </>
   )
@@ -237,7 +239,8 @@ function WhatIf({ data, now, ops, setOps, baseStats, scenarioStats, pinned, onAp
     setOps([...ops, { kind: 'addTime', date: addDay, startMin: start, durationMin: addLen }])
   }
 
-  const delta = (a: number | null, b: number | null) => (a === null || b === null ? null : Math.round((b - a) * 100))
+  // Difference of the rounded percentages shown, so "86% → 85%" never reads "(0 pts)".
+  const delta = (a: number | null, b: number | null) => (a === null || b === null ? null : Math.round(b * 100) - Math.round(a * 100))
 
   return (
     <section className="panel" aria-labelledby="wi-h">
