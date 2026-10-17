@@ -29,7 +29,6 @@ import {
   examFor,
   examStartAbs,
   isMissed,
-  minuteShiftNote,
   replan,
   resolveMissedInData,
   sessionEndAbs,
@@ -91,13 +90,12 @@ export function summarizeChange(
   const topicName = (id: string) =>
     newData.topics.find((t) => t.id === id)?.name ?? oldData.topics.find((t) => t.id === id)?.name ?? 'A topic'
   const items = diffPlans(before, after, { topicName, today: now.date, skippedIds: opts.skippedIds })
-  const shift = minuteShiftNote(before, after, topicName)
   const forecast = forecastShiftNote(oldData, newData, now)
   return {
     id: uid('chg'),
     title,
     items,
-    note: [opts.note, shift, forecast].filter(Boolean).join(' ') || undefined,
+    note: [opts.note, forecast].filter(Boolean).join(' ') || undefined,
     canUndo: opts.canUndo ?? true,
   }
 }
@@ -127,7 +125,7 @@ export function skipSession(data: AppData, sessionId: string, now: LocalMoment):
   const pBefore = Math.round(pComplete(data.completion, s.durationMin) * 100)
   const pAfter = Math.round(pComplete(mid.completion, s.durationMin) * 100)
   return commit(data, mid, now, 'Skipped. Plans change, and we can work with that.', {
-    note: `Your estimated chance of finishing ${s.durationMin}-minute sessions moved from ${pBefore}% to ${pAfter}%, so Zuno plans a little buffer where it helps most.`,
+    note: `Chance of finishing ${s.durationMin}-minute sessions: ${pBefore}% → ${pAfter}%.`,
     skippedIds: [sessionId],
   })
 }

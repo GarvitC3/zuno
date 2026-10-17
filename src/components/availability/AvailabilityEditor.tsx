@@ -80,10 +80,7 @@ export function AvailabilityEditor({ value, onChange, errors, warnings = {} }: P
   return (
     <div className="stack stack--lg">
       <section className="stack" aria-labelledby="ae-win">
-        <div>
-          <h3 id="ae-win" style={{ fontSize: 'var(--fs-lg)' }}>When could you study?</h3>
-          <p className="muted small">Zuno only plans sessions inside these windows, and never on top of your commitments.</p>
-        </div>
+        <h3 id="ae-win" style={{ fontSize: 'var(--fs-lg)' }}>When could you study?</h3>
         <ErrorText id="ae-win-err">{errors.windows}</ErrorText>
         <ul className="stack">
           {value.windows.map((w, i) => (
@@ -121,11 +118,7 @@ export function AvailabilityEditor({ value, onChange, errors, warnings = {} }: P
       </section>
 
       <section className="stack" aria-labelledby="ae-com">
-        <div>
-          <h3 id="ae-com" style={{ fontSize: 'var(--fs-lg)' }}>What is already taken?</h3>
-          <p className="muted small">School, work, practice, meals, sleep. If an end time is earlier than the start, it runs overnight.</p>
-        </div>
-        {value.commitments.length === 0 ? <p className="muted small">No commitments yet. Add the big ones so sessions land in real gaps.</p> : null}
+        <h3 id="ae-com" style={{ fontSize: 'var(--fs-lg)' }}>What is already taken?</h3>
         <ul className="stack">
           {value.commitments.filter((c) => !c.onDate).map((c) => (
             <li key={c.id} className="editor-row">
@@ -176,7 +169,7 @@ export function AvailabilityEditor({ value, onChange, errors, warnings = {} }: P
       <section className="stack" aria-labelledby="ae-pref">
         <h3 id="ae-pref" style={{ fontSize: 'var(--fs-lg)' }}>How you like to study</h3>
         <div className="grid-3">
-          <Field label="Preferred session length" error={errors.session} hint="Zuno may shorten sessions if you finish shorter ones more often.">
+          <Field label="Preferred session length" error={errors.session}>
             {(p) => (
               <select {...p} className="select" value={value.preferredSessionMin} onChange={(e) => set({ preferredSessionMin: Number(e.target.value) })}>
                 {lengths.map((l) => (
@@ -185,7 +178,7 @@ export function AvailabilityEditor({ value, onChange, errors, warnings = {} }: P
               </select>
             )}
           </Field>
-          <Field label="Break between sessions" error={errors.break} hint="Left free after every session.">
+          <Field label="Break between sessions" error={errors.break}>
             {(p) => (
               <select {...p} className="select" value={value.breakMin} onChange={(e) => set({ breakMin: Number(e.target.value) })}>
                 {BREAKS.map((b) => (
@@ -194,7 +187,7 @@ export function AvailabilityEditor({ value, onChange, errors, warnings = {} }: P
               </select>
             )}
           </Field>
-          <Field label="Most you want to study in a day" error={errors.daily} hint="Zuno never plans more than this.">
+          <Field label="Daily limit" error={errors.daily}>
             {(p) => (
               <select {...p} className="select" value={value.maxDailyMin} onChange={(e) => set({ maxDailyMin: Number(e.target.value) })}>
                 {dailies.map((m) => (

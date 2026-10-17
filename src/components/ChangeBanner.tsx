@@ -7,7 +7,7 @@ export function ChangeBanner() {
   const store = useActions()
   const change = ui.change
   if (!change) return null
-  const shown = change.items.slice(0, 5)
+  const shown = change.items.slice(0, 3)
   const more = change.items.length - shown.length
   return (
     <section className="banner banner--mint fade-in" aria-label="What changed" key={change.id}>
@@ -21,7 +21,7 @@ export function ChangeBanner() {
             {shown.map((it, i) => (
               <li key={i}>{it.text}</li>
             ))}
-            {more > 0 ? <li>…and {more} more small {more === 1 ? 'change' : 'changes'} on the calendar.</li> : null}
+            {more > 0 ? <li>+{more} more on the calendar</li> : null}
           </ul>
         ) : (
           <p className="muted small">Your schedule stayed the same.</p>

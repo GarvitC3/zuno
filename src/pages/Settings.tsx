@@ -40,7 +40,6 @@ export function Settings() {
       <header className="page-head">
         <div>
           <h1>Settings</h1>
-          <p>Your profile, study times, and data.</p>
         </div>
         <button type="button" className="btn btn--sm btn--ghost" onClick={() => setHow(true)}>
           <Lightbulb size={15} aria-hidden="true" /> How Zuno thinks
@@ -53,7 +52,7 @@ export function Settings() {
         <div className="banner banner--coral" role="alert">
           <div className="banner__body">
             <p className="banner__title">Progress can't be saved in this browser</p>
-            <p className="muted small">Browser storage is unavailable or full (a private window can cause this). Zuno still works, but your data will be gone when you close the tab.</p>
+            <p className="muted small">Storage is unavailable or full, so your data will be lost when you close the tab.</p>
           </div>
         </div>
       ) : null}
@@ -75,8 +74,7 @@ export function Settings() {
 
         <section className="panel stack" aria-labelledby="set-off">
           <h2 id="set-off" className="panel__title">Days off and extra time</h2>
-          <p className="muted small">These come from What-If scenarios you applied. Remove one and Zuno re-plans.</p>
-          {futureBlocked.length === 0 && futureExtra.length === 0 ? <p className="muted">Nothing set. Try the What-If simulator on the Memory forecast page.</p> : null}
+          {futureBlocked.length === 0 && futureExtra.length === 0 ? <p className="muted">Nothing set.</p> : null}
           <ul className="stack stack--sm">
             {futureBlocked.map((dte) => (
               <li key={dte} className="row row--between">
@@ -98,7 +96,6 @@ export function Settings() {
         <div className="panel__head" style={{ marginBottom: 0 }}>
           <div>
             <h2 id="set-av" className="panel__title">Study times</h2>
-            <p className="panel__sub">Changing these re-plans your future sessions. Past sessions and recall checks are never touched.</p>
           </div>
         </div>
         <AvailabilityEditor value={av} onChange={(v) => { setAv(v); setSaved(false) }} errors={errors} warnings={warnings} />
@@ -129,7 +126,6 @@ export function Settings() {
             You are exploring <strong>sample data</strong>: a made-up student called Maya with two weeks of history. Nothing here is real.
           </p>
         ) : null}
-        <p className="muted small">Everything is stored only in this browser. No account, no server.</p>
         <div className="row row--wrap">
           <button type="button" className="btn" onClick={() => (data.onboarded && !data.profile.isSample ? setConfirm('demo') : (store.loadDemo(), navigate('/')))}>
             <Sparkles size={16} aria-hidden="true" /> {data.profile.isSample ? 'Reload the sample student' : 'Load sample data'}

@@ -10,7 +10,6 @@ export function Attention({ items }: { items: TopicInsight[] }) {
       <div className="panel__head">
         <div>
           <h2 id="attn-h" className="panel__title">Topics needing attention</h2>
-          <p className="panel__sub">Ranked by importance and forecast recall on exam day.</p>
         </div>
         <a className="btn btn--sm btn--ghost" href="#/subjects">
           All topics <ArrowRight size={15} aria-hidden="true" />

@@ -31,13 +31,6 @@ const DRAFT_KEY = 'zuno:draft'
 // Matches the order subjects are coloured in when the plan is built.
 const PALETTE = ['blue', 'peach', 'mint', 'lilac', 'rose', 'sky', 'gold'] as const
 const STEPS = ['Your subjects', 'Your week', 'Your starting point']
-const IMPORTANCE_HELP: Record<number, string> = {
-  1: 'Nice to know. Rarely tested.',
-  2: 'Small part of the exam.',
-  3: 'A normal topic.',
-  4: 'Counts for a lot.',
-  5: 'Must not slip. A core topic.',
-}
 const FAMILIARITY: { value: Familiarity; label: string; help: string }[] = [
   { value: 1, label: 'New to me', help: 'I have barely seen it' },
   { value: 2, label: 'Heard of it', help: 'I could recognise some of it' },
@@ -118,7 +111,6 @@ export function Onboarding() {
       <main className="onboard__inner" id="main">
         <header className="onboard__top">
           <a href="#/" className="onboard__brand" aria-label="Zuno, back to welcome"><Wordmark size={30} label={false} /></a>
-          <p className="muted small">Setup takes about two minutes. You can change everything later.</p>
         </header>
 
         <ol className="stepper" aria-label="Setup progress">
@@ -137,13 +129,7 @@ export function Onboarding() {
               <h1 style={{ fontSize: 'var(--fs-2xl)' }}>
                 {step === 0 ? 'What are you studying?' : step === 1 ? 'What does your week look like?' : 'Where are you starting from?'}
               </h1>
-              <p className="muted">
-                {step === 0
-                  ? 'Add each subject, its exam date, and the topics inside it.'
-                  : step === 1
-                    ? 'Tell Zuno when you can study and what is already taken. It plans inside the gaps.'
-                    : 'A rough guess is plenty. These are starting estimates and will improve with recall checks.'}
-              </p>
+              {step === 2 ? <p className="muted">Rough guesses are fine. They improve with recall checks.</p> : null}
             </div>
           </div>
 
@@ -192,12 +178,9 @@ function SubjectsStep({ draft, setDraft, errors, today }: { draft: OnboardingDra
         {(p) => <input {...p} className="input" style={{ maxWidth: 340 }} value={draft.name} maxLength={30} placeholder="Your first name" onChange={(e) => setDraft({ ...draft, name: e.target.value })} />}
       </Field>
 
-      <div className="banner banner--plain" style={{ display: 'block' }}>
-        <p className="small"><strong>How important is a topic?</strong> Zuno gives more study time to topics you rate higher.</p>
-        <p className="small muted">
-          {[1, 2, 3, 4, 5].map((n) => `${n} ${IMPORTANCE_LABEL[n]} (${IMPORTANCE_HELP[n].replace(/\.$/, '')})`).join(' · ')}
-        </p>
-      </div>
+      <p className="small muted">
+        <strong style={{ color: 'var(--text)' }}>Importance:</strong> {[1, 2, 3, 4, 5].map((n) => `${n} ${IMPORTANCE_LABEL[n]}`).join(' · ')}. Higher gets more study time.
+      </p>
 
       <ErrorText>{errors.subjects}</ErrorText>
       <ul className="stack stack--lg">
@@ -215,7 +198,7 @@ function SubjectsStep({ draft, setDraft, errors, today }: { draft: OnboardingDra
               <Field label="Subject name" error={errors[`subject:${s.id}:name`]}>
                 {(p) => <input {...p} className="input" value={s.name} maxLength={40} placeholder="e.g. Physics" onChange={(e) => setSubject(s.id, { name: e.target.value })} />}
               </Field>
-              <Field label="Exam date" error={errors[`subject:${s.id}:exam`]} hint="Study sessions are planned before this day.">
+              <Field label="Exam date" error={errors[`subject:${s.id}:exam`]}>
                 {(p) => <input {...p} type="date" className="input" value={s.examDate} min={addDays(today, 1)} onChange={(e) => setSubject(s.id, { examDate: e.target.value })} />}
               </Field>
             </div>
@@ -293,9 +276,6 @@ function StartingStep({ draft, setDraft }: { draft: OnboardingDraft; setDraft: (
           </ul>
         </section>
       ))}
-      <p className="muted small">
-        1 = I have barely seen it, 5 = I could explain it to someone. "I'm not sure yet" is perfectly fine: Zuno starts neutral and your first recall check settles it fast.
-      </p>
     </div>
   )
 }
@@ -367,7 +347,6 @@ function Proposal({ draftName, data, onBack, onAccept }: { draftName: string; da
                   </li>
                 ))}
               </ul>
-              <p className="muted small">Every number is an estimate. Zuno re-plans after each recall check or skipped session.</p>
             </div>
           )}
 

@@ -18,9 +18,7 @@ export function forecastLegend() {
   return [
     { label: 'With planned reviews', color: '#89AFFF' },
     { label: 'No further review', color: '#FFB681', dash: '7 6' },
-    { label: 'Model estimate so far', color: '#7C89A0' },
-    { label: 'Recall check (observed score)', color: '#92D6BD', kind: 'ring' as const },
-    { label: 'Planned review', color: '#89AFFF', kind: 'tri' as const },
+    { label: 'Recall check', color: '#92D6BD', kind: 'ring' as const },
   ]
 }
 
@@ -43,7 +41,6 @@ export function MiniForecast({ data, now, defaultTopicId }: { data: AppData; now
       <div className="panel__head">
         <div>
           <h2 id="mini-fc-h" className="panel__title">Memory forecast</h2>
-          <p className="panel__sub">Estimated recall for one topic, up to its exam.</p>
         </div>
         <a className="btn btn--sm btn--ghost" href="#/forecast">
           Full forecast <ArrowRight size={15} aria-hidden="true" />
@@ -68,6 +65,7 @@ export function MiniForecast({ data, now, defaultTopicId }: { data: AppData; now
             <span className="chip chip--peach">
               {f.subject.name} exam · {formatDateShort(f.exam.date)}, {formatClock(f.exam.startMin)}
             </span>
+            <span className="chip">Estimate</span>
           </div>
           <ForecastChart
             series={forecastSeries(f)}
@@ -82,10 +80,6 @@ export function MiniForecast({ data, now, defaultTopicId }: { data: AppData; now
             ariaLabel={`Forecast for ${f.topic.name}: expected recall on exam day is ${pct(f.examPlan)} with planned reviews and ${pct(f.examBaseline)} with no further review.`}
           />
           <ChartLegend items={forecastLegend()} />
-          <p className="small muted">
-            On exam day, expect about <strong style={{ color: 'var(--blue)' }}>{pct(f.examPlan)}</strong> with your planned reviews versus{' '}
-            <strong style={{ color: 'var(--peach)' }}>{pct(f.examBaseline)}</strong> with none. These are estimates.
-          </p>
         </div>
       )}
     </section>

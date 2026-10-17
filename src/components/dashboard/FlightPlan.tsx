@@ -1,4 +1,3 @@
-import { CalendarDays } from 'lucide-react'
 import { sessionState, type TodaySummary } from '../../engine/insights'
 import { sessionSpan } from '../../engine/slots'
 import { formatClock, formatMinutes, type LocalMoment } from '../../engine/time'
@@ -23,21 +22,16 @@ export function FlightPlan({ data, now, summary, onOpen }: { data: AppData; now:
       <div className="panel__head">
         <div>
           <h2 id="flight-h" className="panel__title">Today's flight plan</h2>
-          <p className="panel__sub">
-            {totalCount === 0
-              ? 'Nothing planned for today.'
-              : `${doneCount} of ${totalCount} done · ${formatMinutes(remainingMinutes)} left of ${formatMinutes(plannedMinutes)} planned`}
-          </p>
+          {totalCount > 0 ? (
+            <p className="panel__sub">{doneCount} of {totalCount} done · {formatMinutes(remainingMinutes)} left of {formatMinutes(plannedMinutes)}</p>
+          ) : null}
         </div>
-        <a className="btn btn--sm btn--ghost" href="#/calendar">
-          <CalendarDays size={15} aria-hidden="true" /> Calendar
-        </a>
       </div>
       {rows.length === 0 ? (
         <div className="empty empty--compact">
           <Astronaut mood="rest" size={72} />
           <h3>A quiet day</h3>
-          <p>No sessions today. Rest is part of the plan, and Zuno will line up what's next.</p>
+          <p>Rest is part of the plan.</p>
         </div>
       ) : (
         <ol className="plan-list">
@@ -64,7 +58,7 @@ export function FlightPlan({ data, now, summary, onOpen }: { data: AppData; now:
                       <span className="subj-dot" aria-hidden="true" /> {subject?.name} · {s.status === 'completed' || s.status === 'partial' ? (s.actual?.minutes ?? s.durationMin) : s.durationMin} min
                     </span>
                   </span>
-                  <SessionStatusBadge state={st} />
+                  {st !== 'upcoming' ? <SessionStatusBadge state={st} /> : <span />}
                 </button>
               </li>
             )

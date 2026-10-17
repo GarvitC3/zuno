@@ -8,11 +8,10 @@ import { ChangeBanner } from '../components/ChangeBanner'
 import { HowItWorks } from '../components/HowItWorks'
 import { SessionDetail } from '../components/SessionDetail'
 import { Astronaut } from '../components/brand/Astronaut'
-import { diffDays, formatDateLong, formatMinutes } from '../engine/time'
+import { formatDateLong, formatMinutes } from '../engine/time'
 import { useActions, useData, useDerived, useNow, useUi } from '../state/context'
 import { navigate } from '../state/router'
 import { formatElapsed, useElapsedMs } from '../state/useElapsed'
-import { IMPORTANCE_LABEL } from '../engine/insights'
 
 function greeting(hour: number, name: string): string {
   const part = hour < 5 ? 'Still up' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
@@ -34,11 +33,6 @@ export function Dashboard() {
   }, [d.insights])
 
   const unmet = data.planMeta.unmet
-  const unmetNames = unmet
-    .map((u) => data.topics.find((t) => t.id === u.topicId)?.name)
-    .filter(Boolean)
-    .slice(0, 3)
-    .join(', ')
   const missedCount = d.behind.missed.length
   const timer = data.activeTimer
   const timedSession = timer ? data.sessions.find((s) => s.id === timer.sessionId && s.status === 'planned') : undefined
@@ -63,10 +57,7 @@ export function Dashboard() {
       </div>
 
       <header className="page-head">
-        <div>
-          <h1>{greeting(Math.floor(now.minute / 60), data.profile.name)}</h1>
-          <p>A little progress. A clearer path.</p>
-        </div>
+        <h1>{greeting(Math.floor(now.minute / 60), data.profile.name)}</h1>
       </header>
 
       {ui.notice ? (
@@ -87,7 +78,7 @@ export function Dashboard() {
           <div className="banner__body">
             <p className="banner__title">Session in progress: {timedTopic.name}</p>
             <p className="muted small">
-              {timer?.useTimer ? `${formatElapsed(elapsed)} of ${timedSession.durationMin} min so far${timer.runningSince === null ? ' (paused)' : ''}.` : 'Timer off.'} Pick up where you left off.
+              {timer?.useTimer ? `${formatElapsed(elapsed)} of ${timedSession.durationMin} min so far${timer.runningSince === null ? ' (paused)' : ''}.` : 'Timer off.'}
             </p>
             <div className="banner__actions">
               <button type="button" className="btn btn--sm btn--primary" onClick={() => navigate(`/session/${timedSession.id}`)}>
@@ -106,11 +97,7 @@ export function Dashboard() {
           <div className="banner__icon"><LifeBuoy size={18} aria-hidden="true" /></div>
           <div className="banner__body">
             <p className="banner__title">Plans change. We can work with that.</p>
-            <p className="muted small">
-              {missedCount > 0 ? `${missedCount} earlier ${missedCount === 1 ? 'session was' : 'sessions were'} not recorded. ` : ''}
-              {unmet.length > 0 ? `There may not be enough time to fully prepare ${unmetNames}${unmet.length > 3 ? ' and more' : ''}. ` : ''}
-              Course Correction builds a realistic plan from the time you actually have.
-            </p>
+            {missedCount > 0 ? <p className="muted small">{missedCount} earlier {missedCount === 1 ? 'session was' : 'sessions were'} not recorded.</p> : null}
             <div className="banner__actions">
               <a className="btn btn--sm btn--peach" href="#/correction">Open Course Correction</a>
               {missedCount > 0 ? (
@@ -142,12 +129,10 @@ export function Dashboard() {
               {unmet.slice(0, 4).map((u) => {
                 const t = data.topics.find((x) => x.id === u.topicId)
                 if (!t) return null
-                const exam = data.exams.find((e) => e.id === t.examId)
-                const why = u.reason === 'no_free_time' ? 'no free study time before the exam' : u.reason === 'daily_limit' ? 'your daily study limit is reached' : 'the time budget is used up'
+                const why = u.reason === 'no_free_time' ? 'no free time left' : u.reason === 'daily_limit' ? 'daily limit reached' : 'time budget used up'
                 return (
                   <li key={u.topicId}>
-                    {t.name} ({IMPORTANCE_LABEL[t.importance].toLowerCase()}): forecast {Math.round(u.projectedRecall * 100)}% on exam day, below the {Math.round(u.targetRecall * 100)}% target. About {formatMinutes(u.extraMinutes)} more would help, but {why}
-                    {exam ? ` (exam in ${diffDays(now.date, exam.date)} days)` : ''}.
+                    <strong>{t.name}</strong>: forecast {Math.round(u.projectedRecall * 100)}% (target {Math.round(u.targetRecall * 100)}%), about {formatMinutes(u.extraMinutes)} short. {why[0].toUpperCase() + why.slice(1)}.
                   </li>
                 )
               })}
@@ -165,7 +150,6 @@ export function Dashboard() {
           <div className="banner__icon"><Astronaut mood="cheer" size={30} /></div>
           <div className="banner__body">
             <p className="banner__title">Today's plan is complete</p>
-            <p className="muted small">A little progress. A clearer path. See you at the next session.</p>
           </div>
         </section>
       ) : null}

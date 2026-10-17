@@ -234,7 +234,6 @@ function Flow({ data, session, result, setResult }: { data: AppData; session: Se
               <button type="button" className="btn btn--primary btn--lg" onClick={() => setPhase('quiz')}>
                 <Sparkles size={18} aria-hidden="true" /> Start a {Math.min(5, pickQuestions(bankKey!, 0).length)}-question check
               </button>
-              <p className="small muted">Sample questions with explanations for this topic.</p>
               <button type="button" className="link-btn small" style={{ justifySelf: 'start' }} onClick={() => setPhase('manual')}>
                 I tested myself somewhere else: enter my score
               </button>
@@ -511,7 +510,6 @@ function Result({ data, session, result, minutes }: { data: AppData; session: Se
           : 'Plans change. We can work with that. Zuno will give this topic more attention and space it sensibly.'
   const nextSession = upNext(result.data, now)
   const nextTopic = nextSession ? result.data.topics.find((t) => t.id === nextSession.topicId) : null
-  const after = result.data.topics.find((t) => t.id === topic.id)
 
   return (
     <Shell>
@@ -558,16 +556,13 @@ function Result({ data, session, result, minutes }: { data: AppData; session: Se
           {result.change?.note ? <p>{result.change.note}</p> : null}
           {result.change && result.change.items.length > 0 ? (
             <ul className="banner__list">
-              {result.change.items.slice(0, 5).map((it, i) => (
+              {result.change.items.slice(0, 3).map((it, i) => (
                 <li key={i}>{it.text}</li>
               ))}
             </ul>
           ) : (
             <p className="muted small">Your upcoming sessions stay where they are.</p>
           )}
-          {after && q ? (
-            <p className="muted small">Memory stability is now {after.memory.stability.toFixed(1)} days (it was {q.stabilityBefore.toFixed(1)}). Stronger results lengthen it; weaker ones keep reviews closer together.</p>
-          ) : null}
         </div>
 
         {nextSession && nextTopic ? (

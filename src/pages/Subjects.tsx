@@ -38,7 +38,6 @@ export function Subjects() {
       <header className="page-head">
         <div>
           <h1>Subjects</h1>
-          <p>Every subject, its exam, and how each topic is holding up.</p>
         </div>
         <button type="button" className="btn btn--primary" onClick={() => setDialog({ kind: 'subject' })}>
           <Plus size={18} aria-hidden="true" /> Add subject
@@ -350,7 +349,7 @@ function TopicForm({ subjectId, topic, data, onClose }: { subjectId: string; top
 
 function CheckDialog({ open, topic, onClose }: { open: boolean; topic?: Topic; onClose: () => void }) {
   return (
-    <Modal open={open} onClose={onClose} title={topic ? `Log a recall check: ${topic.name}` : 'Log a recall check'} description="Test yourself without looking, then record how it went.">
+    <Modal open={open} onClose={onClose} title={topic ? `Log a recall check: ${topic.name}` : 'Log a recall check'}>
       {open && topic ? <CheckForm topic={topic} onClose={onClose} /> : null}
     </Modal>
   )
@@ -375,9 +374,7 @@ function CheckForm({ topic, onClose }: { topic: Topic; onClose: () => void }) {
   }
   return (
     <form className="stack" onSubmit={(e) => { e.preventDefault(); submit() }}>
-      <p className="muted small">
-        Try 3 to 5 practice questions from your notes, textbook or a past paper. Don't look anything up. Then enter how many you got right. Zuno uses the result to update its estimate and re-plan.
-      </p>
+      <p className="muted small">Try 3 to 5 practice questions from your notes or a past paper, then enter how many you got right.</p>
       <div className="grid-2">
         <Field label="Correct answers" error={touched ? correctErr : undefined}>
           {(p) => <input {...p} autoFocus className="input" type="number" min={0} inputMode="numeric" value={correct} onChange={(e) => { setCorrect(e.target.value); setServerErr(null) }} />}
@@ -391,7 +388,6 @@ function CheckForm({ topic, onClose }: { topic: Topic; onClose: () => void }) {
         <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
         <button type="submit" className="btn btn--primary">Save result</button>
       </div>
-      <p className="muted small">Zuno weighs your score against what it already believed about this topic, so one result nudges the estimate rather than replacing it.</p>
     </form>
   )
 }

@@ -29,20 +29,15 @@ export function Forecast() {
   const store = useActions()
   const d = useDerived(data, now)
   const live = useMemo(() => data.topics.filter((t) => buildForecast(data, t.id, now) !== null), [data, now])
-  const [subjectId, setSubjectId] = useState('')
   const [topicId, setTopicId] = useState('')
   const [ops, setOps] = useState<WhatIfOp[]>([])
 
   const subjects = useMemo(() => data.subjects.filter((s) => live.some((t) => t.subjectId === s.id)), [data.subjects, live])
   useEffect(() => {
     const first = live.find((t) => t.id === d.next?.topicId) ?? live[0]
-    if (!live.some((t) => t.id === topicId) && first) {
-      setTopicId(first.id)
-      setSubjectId(first.subjectId)
-    }
+    if (!live.some((t) => t.id === topicId) && first) setTopicId(first.id)
   }, [live, topicId, d.next?.topicId])
 
-  const topicsHere = live.filter((t) => t.subjectId === subjectId)
   const f = useMemo(() => (topicId ? buildForecast(data, topicId, now) : null), [data, now, topicId])
   const scenario = useMemo(() => (ops.length ? runScenario(data, now, ops) : null), [data, now, ops])
   const fs = useMemo(() => (scenario && topicId ? buildForecast(scenario.data, topicId, now) : null), [scenario, topicId, now])
@@ -52,14 +47,11 @@ export function Forecast() {
     return (
       <>
         <header className="page-head">
-          <div>
-            <h1>Memory forecast</h1>
-            <p>See how much you are likely to remember on exam day.</p>
-          </div>
+          <h1>Memory forecast</h1>
         </header>
         <section className="panel empty">
           <h3>Nothing to forecast yet</h3>
-          <p>Add a subject with an upcoming exam date and some topics. Zuno will chart your expected recall with and without planned reviews.</p>
+          <p>Add a subject with an upcoming exam date and some topics.</p>
           <a className="btn btn--primary" href="#/subjects">Open subjects</a>
         </section>
       </>
@@ -68,107 +60,117 @@ export function Forecast() {
 
   const series: ChartSeries[] = f ? forecastSeries(f) : []
   if (fs) series.push({ id: 'scenario', label: 'What-If preview', points: fs.plan, color: '#92D6BD', dash: '2 5', width: 3 })
-  const legend = forecastLegend()
-  if (fs) legend.splice(1, 0, { label: 'What-If preview (not saved)', color: '#92D6BD', dash: '2 5' } as never)
+  const legend: { label: string; color: string; dash?: string; kind?: 'line' | 'ring' | 'tri' | 'exam' }[] = [
+    ...forecastLegend(),
+    { label: 'Past estimate', color: '#7C89A0' },
+  ]
+  if (fs) legend.splice(2, 0, { label: 'What-If preview', color: '#92D6BD', dash: '2 5' })
+  const reviews = f ? [...f.reviews].sort((a, b) => a.atAbs - b.atAbs) : []
 
   return (
     <>
       <header className="page-head">
-        <div>
-          <h1>Memory forecast</h1>
-          <p>Estimated recall over time, up to the exam. All forecasts are estimates, not promises.</p>
-        </div>
+        <h1>Memory forecast</h1>
       </header>
 
       <ChangeBanner />
 
-      <div className="forecast-grid">
-        <section className="panel" aria-labelledby="fc-h">
-          <div className="panel__head">
-            <div>
-              <h2 id="fc-h" className="panel__title">{f ? f.topic.name : 'Forecast'}</h2>
-              <p className="panel__sub">{f ? `${f.subject.name} exam on ${formatDateWithWeekday(f.exam.date)} at ${formatClock(f.exam.startMin)}` : ''}</p>
-            </div>
-            <div className="row row--wrap">
-              <label className="sr-only" htmlFor="fc-subject">Subject</label>
-              <select id="fc-subject" className="select select--sm" value={subjectId} onChange={(e) => { const sid = e.target.value; setSubjectId(sid); setTopicId(live.find((t) => t.subjectId === sid)?.id ?? '') }}>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <label className="sr-only" htmlFor="fc-topic">Topic</label>
-              <select id="fc-topic" className="select select--sm" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
-                {topicsHere.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {f ? (
-            <div className="stack">
-              <ForecastChart
-                series={series}
-                startAbs={f.startAbs}
-                nowAbs={f.nowAbs}
-                examAbs={f.examAbs}
-                examLabel={`Exam ${formatDateShort(fromAbs(f.examAbs).date)}`}
-                dots={f.observed.map((o) => ({ atAbs: o.atAbs, value: o.value, label: `Recall check: ${o.correct}/${o.total}` }))}
-                marks={f.reviews.map((r) => ({ atAbs: r.atAbs, label: `Planned review, ${r.durationMin} min` }))}
-                height={320}
-                endLabels={fs ? ['scenario', 'plan', 'baseline'] : ['plan', 'baseline']}
-                ariaLabel={`Forecast for ${f.topic.name}: on exam day, ${pct(f.examPlan)} with planned reviews and ${pct(f.examBaseline)} with no further review${fs ? `; the What-If preview gives ${pct(fs.examPlan)}` : ''}.`}
-              />
-              <ChartLegend items={legend} />
-
-              <div className="stats">
-                <div>
-                  <p className="eyebrow">Recall today (estimate)</p>
-                  <p className="stat">{pct(f.recallNow)}</p>
-                </div>
-                <div>
-                  <p className="eyebrow">Exam day · planned reviews</p>
-                  <p className="stat" style={{ color: 'var(--blue)' }}>{pct(f.examPlan)}</p>
-                </div>
-                <div>
-                  <p className="eyebrow">Exam day · no more review</p>
-                  <p className="stat" style={{ color: 'var(--peach)' }}>{pct(f.examBaseline)}</p>
-                </div>
-                {fs ? (
-                  <div>
-                    <p className="eyebrow">Exam day · What-If</p>
-                    <p className="stat" style={{ color: 'var(--mint)' }}>{pct(fs.examPlan)}</p>
-                  </div>
-                ) : null}
+      <section className="panel stack stack--lg" aria-labelledby="fc-h">
+        <div className="fc-head">
+          <div className="stack stack--sm">
+            <h2 id="fc-h" className="fc-title">{f ? f.topic.name : 'Forecast'}</h2>
+            {f ? (
+              <div className="row row--wrap">
+                <span className="chip chip--peach">{f.subject.name} exam · {formatDateWithWeekday(f.exam.date)}, {formatClock(f.exam.startMin)}</span>
+                <span className="chip">Estimate</span>
               </div>
+            ) : null}
+          </div>
+          <div className="fc-pick">
+            <label className="sr-only" htmlFor="fc-topic">Topic</label>
+            <select id="fc-topic" className="select" value={topicId} onChange={(e) => setTopicId(e.target.value)}>
+              {subjects.map((s) => (
+                <optgroup key={s.id} label={s.name}>
+                  {live.filter((t) => t.subjectId === s.id).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+        </div>
 
-              <details className="disclosure">
-                <summary><ChevronRight /> View as a table</summary>
-                <DataTable f={f} fs={fs} now={now} />
-              </details>
+        {f ? (
+          <>
+            <ForecastChart
+              series={series}
+              startAbs={f.startAbs}
+              nowAbs={f.nowAbs}
+              examAbs={f.examAbs}
+              examLabel={`Exam ${formatDateShort(fromAbs(f.examAbs).date)}`}
+              dots={f.observed.map((o) => ({ atAbs: o.atAbs, value: o.value, label: `Recall check: ${o.correct}/${o.total}` }))}
+              marks={f.reviews.map((r) => ({ atAbs: r.atAbs, label: `Planned review, ${r.durationMin} min` }))}
+              height={360}
+              endLabels={fs ? ['scenario', 'plan', 'baseline'] : ['plan', 'baseline']}
+              ariaLabel={`Forecast for ${f.topic.name}: on exam day, ${pct(f.examPlan)} with planned reviews and ${pct(f.examBaseline)} with no further review${fs ? `; the What-If preview gives ${pct(fs.examPlan)}` : ''}.`}
+            />
+            <ChartLegend items={legend} />
+
+            <div className="stats">
+              <div>
+                <p className="eyebrow">Today</p>
+                <p className="stat">{pct(f.recallNow)}</p>
+              </div>
+              <div>
+                <p className="eyebrow">Exam day · with plan</p>
+                <p className="stat" style={{ color: 'var(--blue)' }}>{pct(f.examPlan)}</p>
+              </div>
+              <div>
+                <p className="eyebrow">Exam day · no review</p>
+                <p className="stat" style={{ color: 'var(--peach)' }}>{pct(f.examBaseline)}</p>
+              </div>
+              {fs ? (
+                <div>
+                  <p className="eyebrow">Exam day · What-If</p>
+                  <p className="stat" style={{ color: 'var(--mint)' }}>{pct(fs.examPlan)}</p>
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </section>
 
-        <aside className="stack">
-          <section className="panel" aria-labelledby="rev-h">
-            <h2 id="rev-h" className="panel__title" style={{ marginBottom: 'var(--s-3)' }}>Planned reviews</h2>
-            {f && f.reviews.length > 0 ? (
+            <details className="disclosure">
+              <summary><ChevronRight /> View as a table</summary>
+              <DataTable f={f} fs={fs} now={now} />
+            </details>
+          </>
+        ) : null}
+      </section>
+
+      <div className="forecast-lower">
+        <section className="panel" aria-labelledby="rev-h">
+          <h2 id="rev-h" className="panel__title" style={{ marginBottom: 'var(--s-3)' }}>Planned reviews</h2>
+          {reviews.length > 0 && f ? (
+            <>
               <ol className="reviews">
-                {[...f.reviews].sort((a, b) => a.atAbs - b.atAbs).map((r) => {
+                {reviews.slice(0, 5).map((r) => {
                   const m = fromAbs(r.atAbs)
                   const after = f.plan.filter((p) => p.atAbs === r.atAbs)[1]
                   return (
                     <li key={r.atAbs}>
-                      <strong>{formatDateWithWeekday(m.date)}</strong> · {formatClock(m.minute)}
-                      <span className="muted small"> · {r.durationMin} min · {pct(r.pComplete)} likely to happen{after ? ` · recall after ≈ ${pct(after.recall)}` : ''}</span>
+                      <span>
+                        <strong>{formatDateWithWeekday(m.date)}</strong>
+                        <span className="muted"> · {formatClock(m.minute)} · {r.durationMin} min</span>
+                      </span>
+                      {after ? <span className="rev__after">→ {pct(after.recall)}</span> : null}
                     </li>
                   )
                 })}
               </ol>
-            ) : (
-              <p className="muted small">No further reviews are planned for this topic. {f ? `Forecast recall on exam day is ${pct(f.examBaseline)}.` : ''}</p>
-            )}
-          </section>
+              {reviews.length > 5 ? <p className="muted small" style={{ marginTop: 'var(--s-3)' }}>+{reviews.length - 5} more</p> : null}
+            </>
+          ) : (
+            <p className="muted">None planned.</p>
+          )}
+        </section>
 
-          <WhatIf data={data} now={now} ops={ops} setOps={setOps} baseStats={base} scenarioStats={scenario?.stats ?? null} pinned={scenario?.pinnedOnBlockedDays ?? 0} onApply={() => { store.applyWhatIf(ops); setOps([]); navigate('/') }} />
-        </aside>
+        <WhatIf data={data} now={now} ops={ops} setOps={setOps} baseStats={base} scenarioStats={scenario?.stats ?? null} pinned={scenario?.pinnedOnBlockedDays ?? 0} onApply={() => { store.applyWhatIf(ops); setOps([]); navigate('/') }} />
       </div>
     </>
   )
@@ -240,17 +242,15 @@ function WhatIf({ data, now, ops, setOps, baseStats, scenarioStats, pinned, onAp
   return (
     <section className="panel" aria-labelledby="wi-h">
       <div className="panel__head">
-        <div>
-          <h2 id="wi-h" className="panel__title"><FlaskConical size={18} aria-hidden="true" style={{ verticalAlign: '-3px', marginRight: 6 }} />What-If</h2>
-          <p className="panel__sub">Try a change and preview the result. Nothing is saved until you choose Apply changes.</p>
-        </div>
+        <h2 id="wi-h" className="panel__title"><FlaskConical size={18} aria-hidden="true" style={{ verticalAlign: '-3px', marginRight: 6 }} />What-If</h2>
+        <span className="chip chip--mint">Preview only</span>
       </div>
       <div className="stack">
-        <div className="stack stack--sm">
+        <div className="wi-grid">
           <Field label="Skip a study day">
             {(p) => (
-              <div className="row row--wrap">
-                <select {...p} className="select select--sm" style={{ flex: 1, minWidth: 160 }} value={skipDay} onChange={(e) => setSkipDay(e.target.value)}>
+              <div className="row">
+                <select {...p} className="select select--sm" style={{ flex: 1, minWidth: 0 }} value={skipDay} onChange={(e) => setSkipDay(e.target.value)}>
                   <option value="">Choose a day…</option>
                   {skippable.map((d) => <option key={d} value={d}>{formatDateWithWeekday(d)}</option>)}
                 </select>
@@ -260,18 +260,18 @@ function WhatIf({ data, now, ops, setOps, baseStats, scenarioStats, pinned, onAp
               </div>
             )}
           </Field>
-        </div>
 
-        <fieldset className="stack stack--sm" style={{ border: 0, margin: 0, padding: 0 }}>
-          <legend className="field__label">Add study time</legend>
-          <Field label="Day" hideLabel>{(p) => <select {...p} aria-label="Day for extra study time" className="select select--sm" value={addDay} onChange={(e) => setAddDay(e.target.value)}>{dayOptions.map((d) => <option key={d} value={d}>{formatDateWithWeekday(d)}</option>)}</select>}</Field>
-          <div className="grid-2">
-            <Field label="Start" hideLabel>{(p) => <input {...p} aria-label="Start time for extra study time" type="time" step={300} className="input select--sm" value={addStart} onChange={(e) => setAddStart(e.target.value)} />}</Field>
-            <Field label="Length" hideLabel>{(p) => <select {...p} aria-label="Length of extra study time" className="select select--sm" value={addLen} onChange={(e) => setAddLen(Number(e.target.value))}>{EXTRA_LENGTHS.map((l) => <option key={l} value={l}>{l} min</option>)}</select>}</Field>
-          </div>
-          {err ? <p className="field__error" role="alert">{err}</p> : null}
-          <div><button type="button" className="btn btn--sm" onClick={addTime}><Plus size={15} aria-hidden="true" /> Add time</button></div>
-        </fieldset>
+          <fieldset className="stack stack--sm" style={{ border: 0, margin: 0, padding: 0 }}>
+            <legend className="field__label" style={{ marginBottom: 6 }}>Add study time</legend>
+            <div className="wi-add">
+              <Field label="Day" hideLabel>{(p) => <select {...p} aria-label="Day for extra study time" className="select select--sm" value={addDay} onChange={(e) => setAddDay(e.target.value)}>{dayOptions.map((d) => <option key={d} value={d}>{formatDateWithWeekday(d)}</option>)}</select>}</Field>
+              <Field label="Start" hideLabel>{(p) => <input {...p} aria-label="Start time for extra study time" type="time" step={300} className="input select--sm" value={addStart} onChange={(e) => setAddStart(e.target.value)} />}</Field>
+              <Field label="Length" hideLabel>{(p) => <select {...p} aria-label="Length of extra study time" className="select select--sm" value={addLen} onChange={(e) => setAddLen(Number(e.target.value))}>{EXTRA_LENGTHS.map((l) => <option key={l} value={l}>{l} min</option>)}</select>}</Field>
+              <button type="button" className="btn btn--sm" onClick={addTime}><Plus size={15} aria-hidden="true" /> Add</button>
+            </div>
+            {err ? <p className="field__error" role="alert">{err}</p> : null}
+          </fieldset>
+        </div>
 
         {ops.length > 0 ? (
           <ul className="row row--wrap" aria-label="Scenario changes">
@@ -282,18 +282,15 @@ function WhatIf({ data, now, ops, setOps, baseStats, scenarioStats, pinned, onAp
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="muted small">Add a change above to see a preview.</p>
-        )}
+        ) : null}
 
         {scenarioStats ? (
           <div className="whatif-result" role="status">
-            <p className="chip chip--mint" style={{ justifySelf: 'start' }}>Preview only · not saved</p>
             <dl className="compare">
-              <div><dt>Study time ahead</dt><dd>{Math.round(baseStats.futureMinutes / 60 * 10) / 10} h → <strong>{Math.round(scenarioStats.futureMinutes / 60 * 10) / 10} h</strong></dd></div>
-              <div><dt>Sessions ahead</dt><dd>{baseStats.futureSessions} → <strong>{scenarioStats.futureSessions}</strong></dd></div>
+              <div><dt>Study time</dt><dd>{Math.round(baseStats.futureMinutes / 60 * 10) / 10} h → <strong>{Math.round(scenarioStats.futureMinutes / 60 * 10) / 10} h</strong></dd></div>
+              <div><dt>Sessions</dt><dd>{baseStats.futureSessions} → <strong>{scenarioStats.futureSessions}</strong></dd></div>
               <div>
-                <dt>Exam-day recall (importance-weighted)</dt>
+                <dt>Exam-day recall</dt>
                 <dd>{pct(baseStats.meanProjected)} → <strong>{pct(scenarioStats.meanProjected)}</strong>{delta(baseStats.meanProjected, scenarioStats.meanProjected) !== null ? <span className="muted small"> ({(delta(baseStats.meanProjected, scenarioStats.meanProjected) as number) > 0 ? '+' : ''}{delta(baseStats.meanProjected, scenarioStats.meanProjected)} pts)</span> : null}</dd>
               </div>
             </dl>
@@ -308,4 +305,3 @@ function WhatIf({ data, now, ops, setOps, baseStats, scenarioStats, pinned, onAp
     </section>
   )
 }
-

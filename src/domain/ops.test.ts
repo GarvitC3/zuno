@@ -90,7 +90,7 @@ describe('the key demonstration', () => {
     // The change is explained specifically: what was skipped, the forecast shift, and why buffer appears.
     expect(out.change!.items.some((i) => i.kind === 'removed' && i.text.includes("Newton's laws") && i.text.includes('was skipped'))).toBe(true)
     expect(out.change!.note).toMatch(/Exam-day forecast: Newton's laws \d+% → \d+%/)
-    expect(out.change!.note).toMatch(/chance of finishing 30-minute sessions moved from \d+% to \d+%/)
+    expect(out.change!.note).toMatch(/Chance of finishing 30-minute sessions: \d+% → \d+%/)
     expect(planViolations(out.data, NOW)).toEqual([])
   })
 

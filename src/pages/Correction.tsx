@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, LifeBuoy } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Astronaut } from '../components/brand/Astronaut'
 import { SubjectChip, pct } from '../components/session-ui'
@@ -72,12 +72,10 @@ export function Correction() {
           <Astronaut mood="think" size={84} />
           <div>
             <h2 style={{ fontSize: 'var(--fs-xl)' }}>Plans change. We can work with that.</h2>
-            <p className="muted">
-              Tell Zuno what matters most and how much time you can really give from now on. It will rebuild the plan around that, and show you exactly what is prioritized, reduced or left out, and why. Nothing changes until you apply it.
-            </p>
+            <p className="muted">Pick what matters most and how much time you really have. Nothing changes until you apply it.</p>
             {behind.missed.length > 0 ? (
               <p className="small muted" style={{ marginTop: 6 }}>
-                {behind.missed.length} earlier {behind.missed.length === 1 ? 'session was' : 'sessions were'} not recorded. If you apply this plan, they are marked as skipped so Zuno can learn from them. That is okay.
+                {behind.missed.length} earlier {behind.missed.length === 1 ? 'session' : 'sessions'} not recorded will be marked as skipped.
               </p>
             ) : null}
           </div>
@@ -86,7 +84,6 @@ export function Correction() {
         <div className="grid-2" style={{ alignItems: 'start' }}>
           <fieldset className="stack stack--sm" style={{ border: 0, margin: 0, padding: 0 }}>
             <legend className="field__label">Which exams matter most right now?</legend>
-            <p className="muted small">Pick one or more. Everything else gets the time that is left.</p>
             {upcoming.map(({ s, exam }) => (
               <label key={s.id} className="check">
                 <input type="checkbox" checked={priority.includes(s.id)} onChange={(e) => setPriority(e.target.checked ? [...priority, s.id] : priority.filter((x) => x !== s.id))} />
@@ -96,11 +93,10 @@ export function Correction() {
                 </span>
               </label>
             ))}
-            {priority.length === 0 ? <p className="muted small">With nothing selected, Zuno treats every subject equally.</p> : null}
           </fieldset>
 
           <div className="stack">
-            <Field label="Hours you can realistically study from now until your exams" error={hoursErr} hint={`Your current plan has ${formatMinutes(planMin)}. Be honest: a smaller number you will keep is better than a bigger one you will not.`}>
+            <Field label="Hours you can realistically study from now until your exams" error={hoursErr} hint={`Your current plan has ${formatMinutes(planMin)}.`}>
               {(p) => <input {...p} className="input" type="number" min={0.5} step={0.5} inputMode="decimal" value={hours} onChange={(e) => setHours(e.target.value)} style={{ maxWidth: 180 }} />}
             </Field>
           </div>
@@ -151,7 +147,6 @@ export function Correction() {
             </button>
             <button type="button" className="btn btn--ghost" onClick={() => navigate('/')}>Not now</button>
           </div>
-          <p className="small muted"><LifeBuoy size={14} aria-hidden="true" style={{ verticalAlign: '-2px' }} /> You can undo right after applying. All forecasts are estimates.</p>
         </section>
       ) : null}
     </>
