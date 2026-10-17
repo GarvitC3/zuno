@@ -1,0 +1,93 @@
+/* Zuno design tokens — one place for colour, type, space, radius, motion. */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0c1220;
+  --sidebar: #101725;
+  --panel: #151e2e;
+  --panel-raised: #1b2639;
+  --panel-sunken: #111a29;
+  --border: #2a3548;
+  --border-soft: #212c3f;
+
+  /* Text. Measured contrast on --panel: primary 15.2:1, secondary 7.6:1, tertiary 5.3:1 (all pass WCAG AA) */
+  --text: #f2f4f8;
+  --text-2: #a4b0c5;
+  --text-3: #8592a9;
+
+  /* Accents */
+  --blue: #89afff; /* primary interactive */
+  --blue-strong: #a8c3ff;
+  --blue-wash: rgba(137, 175, 255, 0.12);
+  --peach: #ffb681; /* attention */
+  --peach-wash: rgba(255, 182, 129, 0.12);
+  --mint: #92d6bd; /* positive */
+  --mint-wash: rgba(146, 214, 189, 0.12);
+  --lilac: #bba9f6;
+  --rose: #f4a9c2;
+  --sky: #8ed6f2;
+  --gold: #f2d27a;
+  --coral: #ff9a8d; /* errors: warm, never alarming */
+  --coral-wash: rgba(255, 154, 141, 0.12);
+
+  /* Mascot suit */
+  --suit: #f6efdd;
+  --suit-shade: #e4dac1;
+  --visor: #121a2e;
+
+  /* Type */
+  --font-display: 'Fredoka Variable', 'Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  --font-ui: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+
+  /* Space (4px base) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* Radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+
+  /* Elevation & glow */
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(3, 7, 16, 0.35);
+  --glow-blue: 0 0 0 1px rgba(137, 175, 255, 0.4), 0 0 28px rgba(137, 175, 255, 0.16);
+  --glow-peach: 0 0 0 1px rgba(255, 182, 129, 0.4), 0 0 28px rgba(255, 182, 129, 0.14);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+
+  /* Layout */
+  --sidebar-w: 92px;
+  --content-max: 1240px;
+  --bottom-nav-h: 68px;
+
+  --focus: 0 0 0 3px rgba(137, 175, 255, 0.55);
+}
+
+/* Subject colour roles. Set `data-color` on any element to expose --subj. */
+[data-color='blue'] { --subj: var(--blue); }
+[data-color='peach'] { --subj: var(--peach); }
+[data-color='mint'] { --subj: var(--mint); }
+[data-color='lilac'] { --subj: var(--lilac); }
+[data-color='rose'] { --subj: var(--rose); }
+[data-color='sky'] { --subj: var(--sky); }
+[data-color='gold'] { --subj: var(--gold); }
