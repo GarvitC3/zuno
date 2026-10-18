@@ -2,17 +2,7 @@
 
 Zuno is a personal "mission control" for studying. Given **what you remember, how much time you really have, and how realistically you will study**, it answers one question: *what should I do next?*
 
-Everything runs in the browser. No account, no API keys, no server, no database.
-
-## Run it
-
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm test           # vitest: maths, scheduler constraints, persistence, UI-facing operations
-npm run typecheck  # tsc (app + tests)
-npm run build      # type-check + production build into dist/
-```
+Everything runs in the browser. Just go to our website zuno-study.vercel.app
 
 ## Try the demo
 
